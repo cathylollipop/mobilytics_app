@@ -14,6 +14,9 @@
 		B1240FE321597D4200DD876D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B1240FE121597D4200DD876D /* LaunchScreen.storyboard */; };
 		B1240FEE21597D4200DD876D /* mobilyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1240FED21597D4200DD876D /* mobilyticsTests.swift */; };
 		B1240FF921597D4200DD876D /* mobilyticsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1240FF821597D4200DD876D /* mobilyticsUITests.swift */; };
+		B124100721597DA700DD876D /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B124100621597DA600DD876D /* Mapbox.framework */; };
+		B124100821597DA700DD876D /* Mapbox.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B124100621597DA600DD876D /* Mapbox.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B124100D2159CEEF00DD876D /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B124100C2159CEEF00DD876D /* CoreLocation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +36,20 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		B124100921597DA700DD876D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B124100821597DA700DD876D /* Mapbox.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		B1240FD521597D4200DD876D /* mobilytics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mobilytics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1240FD821597D4200DD876D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -47,6 +64,8 @@
 		B1240FF421597D4200DD876D /* mobilyticsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mobilyticsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1240FF821597D4200DD876D /* mobilyticsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mobilyticsUITests.swift; sourceTree = "<group>"; };
 		B1240FFA21597D4200DD876D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B124100621597DA600DD876D /* Mapbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Mapbox.framework; sourceTree = "<group>"; };
+		B124100C2159CEEF00DD876D /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +73,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B124100D2159CEEF00DD876D /* CoreLocation.framework in Frameworks */,
+				B124100721597DA700DD876D /* Mapbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,10 +98,12 @@
 		B1240FCC21597D4200DD876D = {
 			isa = PBXGroup;
 			children = (
+				B124100621597DA600DD876D /* Mapbox.framework */,
 				B1240FD721597D4200DD876D /* mobilytics */,
 				B1240FEC21597D4200DD876D /* mobilyticsTests */,
 				B1240FF721597D4200DD876D /* mobilyticsUITests */,
 				B1240FD621597D4200DD876D /* Products */,
+				B124100B2159CEEE00DD876D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -125,6 +148,14 @@
 			path = mobilyticsUITests;
 			sourceTree = "<group>";
 		};
+		B124100B2159CEEE00DD876D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B124100C2159CEEF00DD876D /* CoreLocation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -135,6 +166,8 @@
 				B1240FD121597D4200DD876D /* Sources */,
 				B1240FD221597D4200DD876D /* Frameworks */,
 				B1240FD321597D4200DD876D /* Resources */,
+				B124100921597DA700DD876D /* Embed Frameworks */,
+				B124100A21597DBE00DD876D /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -253,6 +286,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B124100A21597DBE00DD876D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "bash \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Mapbox.framework/strip-frameworks.sh\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B1240FD121597D4200DD876D /* Sources */ = {
@@ -428,6 +477,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J8PMCF872J;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = mobilytics/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = edu.vanderbilt.mobilytics.mobilytics;
@@ -443,6 +496,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J8PMCF872J;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = mobilytics/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = edu.vanderbilt.mobilytics.mobilytics;
