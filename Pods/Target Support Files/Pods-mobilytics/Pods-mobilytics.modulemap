@@ -1,0 +1,6 @@
+framework module Pods_mobilytics {
+  umbrella header "Pods-mobilytics-umbrella.h"
+
+  export *
+  module * { export * }
+}
