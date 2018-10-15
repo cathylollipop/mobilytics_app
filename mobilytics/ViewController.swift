@@ -7,11 +7,12 @@
 //
 
 // 问题1: search bar点了一个地址之后fill到search bar里 done
-// 问题2: search bar点了一个地址后为啥不center到该地址要跳回来？？好像模拟器上就可以center到新地址，手机上不行。想法：判断是否是first launch但不行。还有thread总报异常 + 如果search完地址不打空格直接点tableview的cell会跳到错误的地址...
+// 问题2: search bar点了一个地址后为啥不center到该地址要跳回来？？好像模拟器上就可以center到新地址，手机上不行。想法：判断是否是first launch但不行。还有thread总报异常 + 如果search完地址不打空格直接点tableview的cell会跳到错误的地址... done
 // zoom放大一些 done
 // 问题3: 写一个方法，take两个address然后实现animation，暂时用点就可以
 // 问题4：实现navigation bar，先有一个home button，左边放一个marker，点home跳到地图界面
 // 问题5: navigation icon写在search bar里面，跟google map一样
+// 问题6: tapGesture和annotation didSelect conflict  done
 
 import UIKit
 import Mapbox
@@ -21,13 +22,11 @@ import MapboxGeocoder
 
 let MapboxAccessToken = "pk.eyJ1IjoibGl4aWFvOTAwOTIxIiwiYSI6ImNqbHVkNnlvcjBpMHIzd29kMXExd2RweGQifQ.PdaL8KX_tijW_ADH21BO0Q"
 
-class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDelegate, UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate {
+class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDelegate, UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate {
     var locationManager:CLLocationManager!
     var currentLocation:CLLocation!
     var mapView:MGLMapView!
-    var myLatitude = 0.0
-    var myLongtitude = 0.0
-    //var gestureRecognizer = UITapGestureRecognizer()
+    var tap = UITapGestureRecognizer()
     var gestureRecognizer = UILongPressGestureRecognizer()
     
     var searchBar: UISearchBar!
@@ -55,6 +54,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
     var currentIndex = 1
     var allCoordinates: [CLLocationCoordinate2D]!
     
+    var selectAnnotation: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,6 +70,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
             locationManager.requestAlwaysAuthorization()
             locationManager.startUpdatingLocation()
+                
+            
         }
         
         // Do any additional setup after loading the view, typically from a nib.
@@ -77,12 +79,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
         mapView = MGLMapView(frame: view.bounds, styleURL: url)
         
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        if(firstLaunch){
-            mapView.setCenter(CLLocationCoordinate2D(latitude: self.myLatitude, longitude: self.myLongtitude), zoomLevel: 10, animated: false)
-            firstLaunch = false
-            
-        }
-        print("firstLaunch: \(firstLaunch)")
         view.addSubview(mapView)
         mapView.delegate = self
         
@@ -101,27 +97,21 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
         
         geocoder = Geocoder(accessToken: MapboxAccessToken)
         
-        //gestureRecognizer2 = UITapGestureRecognizer(target: self, action: #selector(hideTableView(_:)))
         // tap gesture to didsmiss keyword
-        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard(_:)))
+        tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard(_:)))
         tap.cancelsTouchesInView = false
-        mapView.addGestureRecognizer(tap)
+        view.addGestureRecognizer(tap)
         
         // longpress gesture to pop up an annotation
         gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(addPin2(_:)))
         mapView.addGestureRecognizer(gestureRecognizer)
-       //mapView.addGestureRecognizer(gestureRecognizer2)
-       // markerGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(popupCallout(_:)))
         
         self.searchBar = UISearchBar(frame: CGRect(x: 15, y: 50, width: (view.bounds.width-30), height: 50))
         self.searchBar.delegate = self
+        
         mapView.addSubview(searchBar)
         
-        //dropdown
-        //let barHeight: CGFloat = UIApplication.shared.statusBarFrame.size.height
-        //let displayWidth: CGFloat = self.mapView.frame.width
-       // let displayHeight: CGFloat = self.mapView.frame.height
-        
+        // dropdown list when tapping on search bar
         dropDownList = UITableView(frame: CGRect(x:15 , y:100 , width: (view.bounds.width-30), height: (view.bounds.height*0.3)))
         dropDownList.register(UITableViewCell.self, forCellReuseIdentifier: "mycell")
         dropDownList.dataSource = self
@@ -131,16 +121,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
         
         multiAnnotations(multipleAnnotations: &multipleAnnotations)
     }
-    override func viewWillAppear(_ animated: Bool) {
-       
-        self.firstLaunch = false
-    }
     
     // Wait until the map is loaded before adding to the map.
     func mapViewDidFinishLoadingMap(_ mapView: MGLMapView) {
         addPolyline(to: mapView.style!)
         animatePolyline()
     }
+    
+    
     
     func addPolyline(to style: MGLStyle) {
         // Add an empty MGLShapeSource, we’ll keep a reference to this and add points to this later.
@@ -314,7 +302,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
         if(searchText.isEmpty){
             dropDownList.isHidden = true
             search_datas.removeAll()
@@ -382,16 +369,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
         
         let center = CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
         _ = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-       
-//        if(!launchedBefore){
-//            print("Not first launch.")
-//        }else{
-//            self.mapView.setCenter(center, animated: true)
-//            print("First launch, setting UserDefault.")
-//            UserDefaults.standard.set(true, forKey: "launchedBefore")
-//        }
         
-        self.mapView.setCenter(center, animated: true)
+        self.mapView.setCenter(center, zoomLevel: 10, animated: true)
+        locationManager.stopUpdatingLocation()
+        //self.mapView.setCenter(center, animated: true)
 
     }
     
@@ -412,13 +393,14 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
     // function to dismissKeyboard
     @objc func dismissKeyboard(_ sender: UITapGestureRecognizer) {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
-        mapView.endEditing(true)
+        //mapView.endEditing(true)
+        self.searchBar.resignFirstResponder()
+        tap.cancelsTouchesInView = false
+        mapView.isUserInteractionEnabled = true
+        
     }
-
-//    @objc func hideTableView(_ sender: UITapGestureRecognizer) {
-//        print("hide action")
-//        self.dropDownList.isHidden = true
-//    }
+    
+    
     
     func addAnnotation(lat: CLLocationDegrees, lng: CLLocationDegrees) {
         annotation.coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lng)
@@ -445,7 +427,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MGLMapViewDel
 //        }
 //    }
     
+    
     func mapView(_ mapView: MGLMapView, didSelect annotation: MGLAnnotation){
+        print("didSelect annotation           ")
+        //self.searchBar.resignFirstResponder()
         let lat = annotation.coordinate.latitude
         let lng = annotation.coordinate.longitude
         
